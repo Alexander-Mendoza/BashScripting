@@ -31,7 +31,7 @@ function martingala(){
 	echo -ne "${yellowColour}[+]${endColour}${grayColour} ¿Cuánto dinero tienes pensado apostar? ->${endColour} " && read initial_bet
 	echo -ne "${yellowColour}[+]${endColour}${grayColour} ¿A qué deseas apostar continuamente (par/impar)? ->${endColour} " && read par_impar
 
-	echo -e "\n${yellowColour}[+]${endColour}${grayColour} Vamos a jugar con una cantidad inicial de${endColour}${yellowColour} $initial_bet€${endColour}${grayColour} a${endColour}${yellowColour} $par_impar${endColour}"
+#	echo -e "\n${yellowColour}[+]${endColour}${grayColour} Vamos a jugar con una cantidad inicial de${endColour}${yellowColour} $initial_bet€${endColour}${grayColour} a${endColour}${yellowColour} $par_impar${endColour}"
 
 	#Crear un backup del dinero apostado
 	backup_bet=$initial_bet
@@ -55,15 +55,16 @@ function martingala(){
 		random_number="$(($RANDOM % 37))"
 #		echo -e "${yellowColour}[+]${endColour}${grayColour} Ha salido el número${endColour}${blueColour} $random_number${endColour}"
 		
-		#-le --> Menor igual
-		if [ ! "$money" -le 0 ]; then
+		#-le --> Menor o igual
+		if [ ! "$money" -lt 0 ]; then
 			if [ "$par_impar" == "par" ]; then
+				#Todo esto es para cuando se apuesta un número par.
 				if [ "$(($random_number % 2))" -eq 0 ]; then
 					if [ "$random_number" -eq 0 ]; then
 #						echo -e "${redColour}[+] Ha salido el 0, por tanto perdemos${endColour}"
 						initial_bet=$(($initial_bet*2))
 #						echo -e "${yellowColour}[+]${endColour}${grayColour} Ahora mimso te quedas en${endColour}${yellowColour} $money€${endColour}"
-						jugadas_malas+="$random_number "
+						jugadas_malas+=" $random_number "
 					else
 #						echo -e "${yellowColour}[+]${endColour}${greenColour} El número que ha salido es par, ¡ganas!${endColour}"
 						#Es la recompensa, ya que cuando se gana, se recupera lo perdido más el doble
@@ -86,15 +87,42 @@ function martingala(){
 					initial_bet=$(($initial_bet*2))
 
 					#Se añade el número impar que salió
-					jugadas_malas+="$random_number "
+					jugadas_malas+=" $random_number "
 #					echo -e "${yellowColour}[+]${endColour}${grayColour} Ahora mimso te quedas en${endColour}${yellowColour} $money€${endColour}"
 				fi
 				#sleep 2
+			else
+				#Cuando se apuesta por número impar.
+				if [ "$(($random_number % 2))" -eq 1 ]; then
+#					echo -e "${yellowColour}[+]${endColour}${greenColour} El número que ha salido es impar, ¡ganas!${endColour}"
+					#Es la recompensa, ya que cuando se gana, se recupera lo perdido más el doble
+					reward=$(($initial_bet*2))
+#					echo -e "${yellowColour}[+]${endColour}${grayColour} Ganas un total de${endColour}${yellowColour} $reward€${endColour}"
+					#se suma la recompensa al dinero total
+					money=$(($money+$reward))
+#					echo -e "${yellowColour}[+]${endColour}${grayColour} Tienes${endColour}${yellowColour} $money€${endColour}"
+					initial_bet=$backup_bet
+					jugadas_malas="[ "
+
+					# -gt es mayor que
+					if [ "$money" -gt "$max_money" ]; then
+						max_money="$money"
+					fi
+				else
+#					echo -e  "${yellowColour}[+]${endColour}${redColour} El número que ha salido es par, ¡pierdes!${endColour}"
+					#Cuando se pierde la apuesta se duplica
+					initial_bet=$(($initial_bet*2))
+
+					#Se añade el número impar que salió
+					jugadas_malas+=" $random_number "
+#					echo -e "${yellowColour}[+]${endColour}${grayColour} Ahora mimso te quedas en${endColour}${yellowColour} $money€${endColour}"
+				fi
+
 			fi
 		else
 			#Se ha quedado sin dinero
 			echo -e "\n${redColour}[!] Te has quedado sin dinero${endColour}\n"
-			echo -e "${yellowColour}[+]${endColour}${grayColour} Han habido un total de${endColour}${yellowColour} $play_counter${endColour}${grayColour} jugadas${endColour}"
+			echo -e "${yellowColour}[+]${endColour}${grayColour} Han habido un total de${endColour}${yellowColour} $(($play_counter-1))${endColour}${grayColour} jugadas${endColour}"
 			echo -e "\n${yellowColour}[+]${endColour}${grayColour} A continuación se van a representar las malas jugas consecutivas que han salido${endColour}\n"
 			echo -e "${blueColour}$jugadas_malas]${endColour}"
 
