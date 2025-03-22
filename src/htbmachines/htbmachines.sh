@@ -24,7 +24,7 @@ main_url="https://htbmachines.github.io/bundle.js"
 
 function helpPanel(){
 	echo -e "\n${yellowcolour}[+]${endColour}${grayColour} Uso:${endColour}"
-	echo -e "\t${purpleColour}p)${endColour}${grayColour} Descargar o actualizar archivsos necesarios${endColour}"
+	echo -e "\t${purpleColour}u)${endColour}${grayColour} Descargar o actualizar archivsos necesarios${endColour}"
 	echo -e "\t${purpleColour}m)${endColour}${grayColour} Buscar por un nombre de máquina${endColour}"
 	echo -e "\t${purpleColour}i)${endColour}${grayColour} Buscar por dirección IP${endColour}"
 	echo -e "\t${purpleColour}d)${endColour}${grayColour} Buscar por la dificultad de una máquina${endColour}"
