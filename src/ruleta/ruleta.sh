@@ -147,19 +147,27 @@ function inverseLabrouchere(){
 
 	jugadas_totales=0
 	bet_to_renew=$(($money+50)) # Dinero el cual una vez alcanzado hará que renovemos nuestra secuencia a [1 2 3 4]
+	
+	#Dinero máximo alcanzado
+	max_money=0
 
 	echo -e "${yellowColour}[+]${endColour}${grayColour} El tope a renovar la secuencia está establecido por encima de los${endColour}${yellowColour} $bet_to_renew€${endColour}"
 	
 	#Comenzamos el bucle
 	tput civis #Ocultar el cursor
 	while true; do
-
+		
+		#Si nuestro dinero es mayor que el tope definido se restablece la secuencia y se le agrega 50 al tope.
 		if [ "$money" -gt "$bet_to_renew" ]; then
 			echo -e "${yellowColour}[+]${endColour}${grayColour} Se ha superado el tope establecido de${endColour}${yellowColour} $bet_to_renew€${endColour}${grayColour} para renovar nuestra secuencia${endColour}"
 			let bet_to_renew+=50
 			echo -e "${yellowColour}[+]${endColour}${grayColour} El tope se ha restablecido en${endColour}${yellowColour} $bet_to_renew€${endColour}"
 			my_sequence=(1 2 3 4)
 			echo -e "${yellowColour}[+]${endColour}${grayColour} La secuencia ha sido restablecida a:${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
+		elif [ "$money" -lt $(($bet_to_renew - 100)) ]; then # Si nuestro dinero es menor que el tope definido menos 100, se renueva el tope a 50 menos.
+			echo -e "${yellowColour}[+]${endColour}${grayColour} Hemos llegado a un mínimo crítico, se procede a reajustar el tope${endColour}"
+			let bet_to_renew-=50
+			echo -e "${yellowColour}[+]${endColour}${grayColour} El tope ha sido renovado a${endColour}${yellowColour} $bet_to_renew€${endColour}"
 		fi
 
 		
@@ -198,8 +206,12 @@ function inverseLabrouchere(){
 					#Sumamos a la secuencia lo apostado anteriormente
 					my_sequence+=($bet)
 					my_sequence=(${my_sequence[@]})
-
+		
 					echo -e "${yellowColour}[+]${endColour}${grayColour} Nuestra nueva secuencia es${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
+					# Si el dinero es mayor que mi dinero máximo ese será mi dinero máximo
+					if [ "$money" -gt "$max_money" ]; then
+						max_money="$money"
+					fi
 				else #Si el número es impar o es cero
 					if [ "$random_number" -eq 0 ]; then
 						echo -e "${redColour}[!] Ha salido el número cero, ¡pierdes!${endColour}"
@@ -218,11 +230,45 @@ function inverseLabrouchere(){
 					my_sequence=(${my_sequence[@]})
 					echo -e "${yellowColour}[+]${endColour}${grayColour} La secuencia se nos queda de la siguiente forma: ${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
 				fi
+			elif [ "$par_impar" == "impar" ]; then
+				if [ "$(($random_number % 2))" -eq 1 ]; then
+					echo -e "${yellowColour}[+]${endColour}${grayColour} El número es impar, ¡ganas!${endColour}"
+					
+					#Calculamos la recompensa
+					reward=$(($bet*2))
+
+					#Sumamos la recompensa al dinero total
+					let money+=$reward
+					echo -e "${yellowColour}[+]${endColour}${grayColour} Tienes${endColour}${blueColour} $money€${endColour}"
+					
+					#Sumamos a la secuencia lo apostado anteriormente
+					my_sequence+=($bet)
+					my_sequence=(${my_sequence[@]})
+		
+					echo -e "${yellowColour}[+]${endColour}${grayColour} Nuestra nueva secuencia es${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
+					# Si el dinero es mayor que mi dinero máximo ese será mi dinero máximo
+					if [ "$money" -gt "$max_money" ]; then
+						max_money="$money"
+					fi
+				else #Si el número es par
+					echo -e "${redColour}[!] El número es par, ¡pierdes!${endColour}"
+					if [ "${#my_sequence[@]}" -gt 2 ]; then
+						#Eliminamos el primer y el último elemento del Array
+						unset my_sequence[0]
+						unset my_sequence[-1]
+					else
+						my_sequence=(1 2 3 4)
+						echo -e "${redColour}[!] Hemos perdidio nuestra secuencia, será restablecida${endColour}"
+					fi
+					#Para que no dé conflicto se debe volver asignar el contenido al array.	
+					my_sequence=(${my_sequence[@]})
+					echo -e "${yellowColour}[+]${endColour}${grayColour} La secuencia se nos queda de la siguiente forma: ${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
+				fi
 			fi
 		else
 			echo -e "\n${redColour}[!] Te has quedado sin dinero${endColour}"
-			echo -e "${yellowColour}[+]${endColour}${grayColour} En total han habido${endColour}${yellowColour} $jugadas_totales${endColour}${grayColour} jugadas totales${endColour}\n"
-
+			echo -e "${yellowColour}[+]${endColour}${grayColour} En total han habido${endColour}${yellowColour} $jugadas_totales${endColour}${grayColour} jugadas totales${endColour}"
+			echo -e "${yellowColour}[+]${endColour}${grayColour} Dinero máximo alcanzado:${endColour}${yellowColour} $max_money€${endColour}\n"
 			tput cnorm; exit 1
 		fi
 		#sleep 1
