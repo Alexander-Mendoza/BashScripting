@@ -155,7 +155,8 @@ function inverseLabrouchere(){
 		if [ "${#my_sequence[@]}" -gt 1 ]; then
 			#Nuestra apuesta se basa en sumar el primer y último elemento de Array
 			bet=$((${my_sequence[0]} + ${my_sequence[-1]}))
-		elif [ "${#my_sequence[@]}" -eq 1 ]; then
+		else
+			#Si nuestro array no es mayor que uno significa que solo hay un elemento que será nuestra siguiente apuesta
 			bet=${my_sequence[0]}
 		fi
 
@@ -165,6 +166,7 @@ function inverseLabrouchere(){
 		echo -e "\n${yellowColour}[+]${endColour}${grayColour} Invertimos${endColour}${yellowColour} $bet€${endColour}"
 		echo -e "${yellowColour}[+]${endColour}${grayColour} Tenemos${endColour}${yellowColour} $money€${endColour}"
 
+		#Generamos el número random
 		random_number=$(($RANDOM % 37))
 		echo -e "\n${yellowColour}[+]${endColour}${grayColour} Ha salido el número${endColour}${blueColour} $random_number${endcolour}"
 
@@ -184,16 +186,17 @@ function inverseLabrouchere(){
 			else
 				echo -e "${redColour}[!] El número es impar, ¡pierdes!${endColour}"
 				
-				if [ "${#my_sequence[@]}" -gt 1 ]; then
+				if [ "${#my_sequence[@]}" -gt 2 ]; then
 					#Eliminamos el primer  el último elemento del Array
 					unset my_sequence[0]
 					unset my_sequence[-1]
-				elif [ "${#my_sequence[@]}" -eq 1 ]; then
+				else
 					my_sequence=(1 2 3 4)
+					echo -e "${redColour}[!] Hemos perdidio nuestra secuencia, será restablecida${endColour}"
 				fi
 				#Para que no dé conflicto se debe volver asignar el contenido al array.	
 				my_sequence=(${my_sequence[@]})
-				echo -e "\n${yellowColour}[+]${endColour}${grayColour} Nuestra nueva sequencia es${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
+				echo -e "${yellowColour}[+]${endColour}${grayColour} La secuencia se nos queda de la siguiente forma: ${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
 			fi
 		fi
 
