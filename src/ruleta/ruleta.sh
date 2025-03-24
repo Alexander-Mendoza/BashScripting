@@ -163,44 +163,55 @@ function inverseLabrouchere(){
 		#Le restamos la apuesta realizada al dinero total
 		let money-=$bet
 		
-		echo -e "\n${yellowColour}[+]${endColour}${grayColour} Invertimos${endColour}${yellowColour} $bet€${endColour}"
-		echo -e "${yellowColour}[+]${endColour}${grayColour} Tenemos${endColour}${yellowColour} $money€${endColour}"
+		#Si el dinero no es menor que cero
+		if [ ! "$money" -lt 0 ]; then
+			echo -e "\n${yellowColour}[+]${endColour}${grayColour} Invertimos${endColour}${yellowColour} $bet€${endColour}"
+			echo -e "${yellowColour}[+]${endColour}${grayColour} Tenemos${endColour}${yellowColour} $money€${endColour}"
 
-		#Generamos el número random
-		random_number=$(($RANDOM % 37))
-		echo -e "\n${yellowColour}[+]${endColour}${grayColour} Ha salido el número${endColour}${blueColour} $random_number${endcolour}"
+			#Generamos el número random
+			random_number=$(($RANDOM % 37))
+			echo -e "\n${yellowColour}[+]${endColour}${grayColour} Ha salido el número${endColour}${blueColour} $random_number${endcolour}"
 
-		if [ "$par_impar" == "par" ]; then
-			if [ "$(($random_number % 2))" -eq 0 ] && [ "$random_number" -ne 0 ] ; then
-				echo -e "${yellowColour}[+]${endColour}${grayColour} El número es par, ¡ganas!${endColour}"
-				reward=$(($bet*2))
-				let money+=$reward
-				echo -e "${yellowColour}[+]${endColour}${grayColour} Tienes${endColour}${blueColour} $money€${endColour}"
-				
-				my_sequence+=($bet)
-				my_sequence=(${my_sequence[@]})
+			if [ "$par_impar" == "par" ]; then
+				if [ "$(($random_number % 2))" -eq 0 ] && [ "$random_number" -ne 0 ] ; then
+					echo -e "${yellowColour}[+]${endColour}${grayColour} El número es par, ¡ganas!${endColour}"
+					
+					#Calculamos la recompensa
+					reward=$(($bet*2))
 
-				echo -e "${yellowColour}[+]${endColour}${grayColour} Nuestra nueva secuencia es${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
-			elif [ "$random_number" -eq 0 ]; then
-				echo -e "${redColour}[!] El número es 0, ¡pierdes!${endColour}"
-			else
-				echo -e "${redColour}[!] El número es impar, ¡pierdes!${endColour}"
-				
-				if [ "${#my_sequence[@]}" -gt 2 ]; then
-					#Eliminamos el primer  el último elemento del Array
-					unset my_sequence[0]
-					unset my_sequence[-1]
-				else
-					my_sequence=(1 2 3 4)
-					echo -e "${redColour}[!] Hemos perdidio nuestra secuencia, será restablecida${endColour}"
+					#Sumamos la recompensa al dinero total
+					let money+=$reward
+					echo -e "${yellowColour}[+]${endColour}${grayColour} Tienes${endColour}${blueColour} $money€${endColour}"
+					
+					#Sumamos a la secuencia lo apostado anteriormente
+					my_sequence+=($bet)
+					my_sequence=(${my_sequence[@]})
+
+					echo -e "${yellowColour}[+]${endColour}${grayColour} Nuestra nueva secuencia es${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
+				else #Si el número es impar o es cero
+					if [ "$random_number" -eq 0 ]; then
+						echo -e "${redColour}[!] Ha salido el número cero, ¡pierdes!${endColour}"
+					else
+						echo -e "${redColour}[!] El número es impar, ¡pierdes!${endColour}"
+					fi
+					if [ "${#my_sequence[@]}" -gt 2 ]; then
+						#Eliminamos el primer  el último elemento del Array
+						unset my_sequence[0]
+						unset my_sequence[-1]
+					else
+						my_sequence=(1 2 3 4)
+						echo -e "${redColour}[!] Hemos perdidio nuestra secuencia, será restablecida${endColour}"
+					fi
+					#Para que no dé conflicto se debe volver asignar el contenido al array.	
+					my_sequence=(${my_sequence[@]})
+					echo -e "${yellowColour}[+]${endColour}${grayColour} La secuencia se nos queda de la siguiente forma: ${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
 				fi
-				#Para que no dé conflicto se debe volver asignar el contenido al array.	
-				my_sequence=(${my_sequence[@]})
-				echo -e "${yellowColour}[+]${endColour}${grayColour} La secuencia se nos queda de la siguiente forma: ${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
 			fi
+		else
+			echo -e "\n${redColour}[!] Te has quedado sin dinero${endColour}\n"
+			tput cnorm; exit 1
 		fi
-
-		sleep 5
+		#sleep 1
 	done
 	tput cnorm #Volver a mostrar el cursor.
 }
