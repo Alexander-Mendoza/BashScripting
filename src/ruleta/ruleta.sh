@@ -133,8 +133,7 @@ function martingala(){
 		#sumar uno a la variable
 		let play_counter+=1
 	done
-
-	tput cnorm #Recuperar el cursor
+tput cnorm #Recuperar el cursor
 }
 
 function inverseLabrouchere(){
@@ -144,14 +143,26 @@ function inverseLabrouchere(){
 	
 	# Declarmos el Array que contiene la secuencia con la que jugaremos.
 	declare -a my_sequence=(1 2 3 4)
-	jugadas_totales=0
 	echo -e "\n${yellowColour}[+]${endColour}${grayColour} Comenzamos con la secuencia${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
 
+	jugadas_totales=0
+	bet_to_renew=$(($money+50)) # Dinero el cual una vez alcanzado hará que renovemos nuestra secuencia a [1 2 3 4]
+
+	echo -e "${yellowColour}[+]${endColour}${grayColour} El tope a renovar la secuencia está establecido por encima de los${endColour}${yellowColour} $bet_to_renew€${endColour}"
+	
 	#Comenzamos el bucle
 	tput civis #Ocultar el cursor
 	while true; do
+
+		if [ "$money" -gt "$bet_to_renew" ]; then
+			echo -e "${yellowColour}[+]${endColour}${grayColour} Se ha superado el tope establecido de${endColour}${yellowColour} $bet_to_renew€${endColour}${grayColour} para renovar nuestra secuencia${endColour}"
+			let bet_to_renew+=50
+			echo -e "${yellowColour}[+]${endColour}${grayColour} El tope se ha restablecido en${endColour}${yellowColour} $bet_to_renew€${endColour}"
+			my_sequence=(1 2 3 4)
+			echo -e "${yellowColour}[+]${endColour}${grayColour} La secuencia ha sido restablecida a:${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
+		fi
+
 		
-		let jugadas_totales+=1
 		#El total de elementos de nuestro array tiene que se mayor a 1 para que pueda sumar los extremos
 		if [ "${#my_sequence[@]}" -gt 1 ]; then
 			#Nuestra apuesta se basa en sumar el primer y último elemento de Array
@@ -165,7 +176,7 @@ function inverseLabrouchere(){
 		let money-=$bet
 		
 		#Si el dinero no es menor que cero
-		if [ ! "$money" -lt 0 ]; then
+		if [ ! "$money" -lt 0 ]; then		
 			echo -e "\n${yellowColour}[+]${endColour}${grayColour} Invertimos${endColour}${yellowColour} $bet€${endColour}"
 			echo -e "${yellowColour}[+]${endColour}${grayColour} Tenemos${endColour}${yellowColour} $money€${endColour}"
 
@@ -196,7 +207,7 @@ function inverseLabrouchere(){
 						echo -e "${redColour}[!] El número es impar, ¡pierdes!${endColour}"
 					fi
 					if [ "${#my_sequence[@]}" -gt 2 ]; then
-						#Eliminamos el primer  el último elemento del Array
+						#Eliminamos el primer y el último elemento del Array
 						unset my_sequence[0]
 						unset my_sequence[-1]
 					else
@@ -215,6 +226,8 @@ function inverseLabrouchere(){
 			tput cnorm; exit 1
 		fi
 		#sleep 1
+	
+	let jugadas_totales+=1
 	done
 	tput cnorm #Volver a mostrar el cursor.
 }
