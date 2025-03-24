@@ -144,13 +144,14 @@ function inverseLabrouchere(){
 	
 	# Declarmos el Array que contiene la secuencia con la que jugaremos.
 	declare -a my_sequence=(1 2 3 4)
-
+	jugadas_totales=0
 	echo -e "\n${yellowColour}[+]${endColour}${grayColour} Comenzamos con la secuencia${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
 
 	#Comenzamos el bucle
 	tput civis #Ocultar el cursor
 	while true; do
 		
+		let jugadas_totales+=1
 		#El total de elementos de nuestro array tiene que se mayor a 1 para que pueda sumar los extremos
 		if [ "${#my_sequence[@]}" -gt 1 ]; then
 			#Nuestra apuesta se basa en sumar el primer y último elemento de Array
@@ -208,7 +209,9 @@ function inverseLabrouchere(){
 				fi
 			fi
 		else
-			echo -e "\n${redColour}[!] Te has quedado sin dinero${endColour}\n"
+			echo -e "\n${redColour}[!] Te has quedado sin dinero${endColour}"
+			echo -e "${yellowColour}[+]${endColour}${grayColour} En total han habido${endColour}${yellowColour} $jugadas_totales${endColour}${grayColour} jugadas totales${endColour}\n"
+
 			tput cnorm; exit 1
 		fi
 		#sleep 1
