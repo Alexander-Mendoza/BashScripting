@@ -27,10 +27,17 @@ function helpPanel(){
 }
 
 function continuar(){
-  echo -e "¿Desea continuar?(si/no)-> " && read continue_option
-  if [ "$continue_option" == "si" ]; then
-    cput cnorm; exit 0
+  money=$1
+  play_counter=$2
+  tput cnorm
+  echo -e "\n${yellowColour}[+]${endColour}${grayColour} ¿Desea continuar?(si/no) ->${endColour} " && read continue_option
+  if [ "$continue_option" == "no" ]; then
+     echo -e "\n${yellowColour}[+]${endColour}${grayColour} Dinero total: ${endColour}${yellowColour} $money€${endColour}"
+     echo -e "${yellowColour}[+]${endColour}${grayColour} Jugadas Totales: ${endColour}${yellowColour} $play_counter${endColour}"
+     echo -e "${redColour}[!] El Juego ha finalizado${redColour}\n"
+     tput cnorm; exit 0
   fi
+  tput civis
 }
 
 function martingala(){
@@ -146,7 +153,7 @@ tput cnorm #Recuperar el cursor
 function inverseLabrouchere(){
 
 	echo -e "\n${yellowColour}[+]${endColour}${grayColour} Dinero actual:${endColour}${greenColour} $money€${endColour}"
-        echo -ne "${yellowColour}[+]${endColour}${grayColour} ¿A qué deseas apostar continuamente (par/impar)? ->${endColour} " && read par_impar
+  echo -ne "${yellowColour}[+]${endColour}${grayColour} ¿A qué deseas apostar continuamente (par/impar)? ->${endColour} " && read par_impar
 	
 	# Declarmos el Array que contiene la secuencia con la que jugaremos.
 	declare -a my_sequence=(1 2 3 4)
@@ -166,15 +173,21 @@ function inverseLabrouchere(){
 		
 		#Si nuestro dinero es mayor que el tope definido se restablece la secuencia y se le agrega 50 al tope.
 		if [ "$money" -gt "$bet_to_renew" ]; then
+      echo -e "\n${redColour}[!] Advertencia${endColour}"
 			echo -e "${yellowColour}[+]${endColour}${grayColour} Se ha superado el tope establecido de${endColour}${yellowColour} $bet_to_renew€${endColour}${grayColour} para renovar nuestra secuencia${endColour}"
 			let bet_to_renew+=50
 			echo -e "${yellowColour}[+]${endColour}${grayColour} El tope se ha restablecido en${endColour}${yellowColour} $bet_to_renew€${endColour}"
 			my_sequence=(1 2 3 4)
 			echo -e "${yellowColour}[+]${endColour}${grayColour} La secuencia ha sido restablecida a:${endColour}${greenColour} [${my_sequence[@]}]${endColour}"
+      
+      #Preguntar al usuario si desea continuar
+      continuar $money $jugadas_totales
 		elif [ "$money" -lt $(($bet_to_renew - 100)) ]; then # Si nuestro dinero es menor que el tope definido menos 100, se renueva el tope a 50 menos.
+      echo -e "\n${redColour}[!] Advertencia${endColour}"
 			echo -e "${yellowColour}[+]${endColour}${grayColour} Hemos llegado a un mínimo crítico, se procede a reajustar el tope${endColour}"
 			let bet_to_renew-=50
 			echo -e "${yellowColour}[+]${endColour}${grayColour} El tope ha sido renovado a${endColour}${yellowColour} $bet_to_renew€${endColour}"
+      continuar $money $jugadas_totales
 		fi
 
 		
