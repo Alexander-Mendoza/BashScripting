@@ -26,6 +26,13 @@ function helpPanel(){
 	exit 1
 }
 
+function continuar(){
+  echo -e "¿Desea continuar?(si/no)-> " && read continue_option
+  if [ "$continue_option" == "si" ]; then
+    cput cnorm; exit 0
+  fi
+}
+
 function martingala(){
 	echo -e "\n${yellowColour}[+]${endColour}${grayColour} Dinero actual:${endColour}${greenColour} $money€${endColour}"
 	echo -ne "${yellowColour}[+]${endColour}${grayColour} ¿Cuánto dinero tienes pensado apostar? ->${endColour} " && read initial_bet
