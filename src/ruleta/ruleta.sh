@@ -22,7 +22,7 @@ trap ctrl_c INT
 function helpPanel(){
 	echo -e "\n${yellowColour}[+]${endColour}${grayColour} Uso:${endColour}${purpleColour} $0${endColour}\n"
 	echo -e "\t${blueColour}-m)${endColour}${grayColour} Dinero con el que se desea jugar${endColour}"
-	echo -e "\t${blueColour}-t)${endColour}${grayColour} Técnica a utilizar${endColour}${purpleColour} (${endColour}${yellowColour}martingala${endColour}${blueColour}/${endColour}${yellowColour}iverseLabrouchere${endColour}${purpleColour})${endColour}\n"
+	echo -e "\t${blueColour}-t)${endColour}${grayColour} Técnica a utilizar${endColour}${purpleColour} (${endColour}${yellowColour}martingala${endColour}${blueColour}/${endColour}${yellowColour}inverseLabrouchere${endColour}${blueColour}/${endColour}${yellowColour}antiMartingala${endColour}${purpleColour})${endColour}\n"
 	exit 1
 }
 
@@ -298,6 +298,10 @@ function inverseLabrouchere(){
 	tput cnorm #Volver a mostrar el cursor.
 }
 
+function antiMartingala(){
+  echo -e "AntiMartingala"
+}
+
 while getopts "m:t:h" arg; do
 	case $arg in
 		m) money="$OPTARG";;
@@ -310,7 +314,9 @@ if [ "$money" ] && [ "$technique" ]; then
 	if [ "$technique" == "martingala" ]; then
 		martingala
 	elif [ "$technique" == "inverseLabrouchere" ]; then
-		inverseLabrouchere		
+		inverseLabrouchere
+  elif [ "$technique" == "antiMartingala" ]; then
+    antiMartingala
 	else
 		echo -e "\n${redColour}[!] La técnica introducida no existe${endColour}"
 		helpPanel
