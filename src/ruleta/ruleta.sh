@@ -299,7 +299,20 @@ function inverseLabrouchere(){
 }
 
 function antiMartingala(){
-  echo -e "AntiMartingala"
+  echo -e "${yellowColour}[+]${endColour}${grayColour} Dinero Total:${endColour}${greenColour} $money${endColour}"
+  echo -ne "${yellowColour}[+]${endColour}${grayColour} Ingrese la cantidad de dinero que desea apostar -> ${endColour}${purpleColour}" && read initial_bet
+  if [[ "$initial_bet" =~ ^[0-9]+$ ]]; then
+    echo -ne "${yellowColour}[+]${endColour}${grayColour} ¿Desea apostar a${endColour}${yellowColour} par${endColour}${grayColour} o${yellowColour} impar${endColour}${grayColour}?${endColour} ${endColour} ${purpleColour}" && read par_impar
+    if [ "${par_impar,,}" == "par" ]; then
+      echo -e "Par"
+    elif [ "${par_impar,,}" == "impar" ]; then
+      echo -e "impar"
+    else
+      echo -e "${redColour}[!] La opción ingresada es inválida${endColour}"
+    fi
+  else
+    echo -e "${redColour}[!] El valor ingresado en la apuesta tienen que ser un valor numérico${endColour}"
+  fi
 }
 
 while getopts "m:t:h" arg; do
@@ -309,18 +322,22 @@ while getopts "m:t:h" arg; do
 		h) helpPanel;;
 	esac
 done
-
-if [ "$money" ] && [ "$technique" ]; then
-	if [ "$technique" == "martingala" ]; then
-		martingala
-	elif [ "$technique" == "inverseLabrouchere" ]; then
-		inverseLabrouchere
-  elif [ "$technique" == "antiMartingala" ]; then
-    antiMartingala
-	else
-		echo -e "\n${redColour}[!] La técnica introducida no existe${endColour}"
-		helpPanel
-	fi
+if [ "$money" -gt "0" ]; then
+  if [ "$money" ] && [ "$technique" ]; then
+    if [ "$technique" == "martingala" ]; then
+      martingala
+    elif [ "$technique" == "inverseLabrouchere" ]; then
+      inverseLabrouchere
+    elif [ "$technique" == "antiMartingala" ]; then
+      antiMartingala
+    else
+      echo -e "\n${redColour}[!] La técnica introducida no existe${endColour}"
+      helpPanel
+    fi
+  else
+    helpPanel	
+  fi
 else
-	helpPanel	
+  echo -e "\n${redColour}[!] El número tiene que ser mayor que cero${endColour}"
+  helpPanel
 fi
