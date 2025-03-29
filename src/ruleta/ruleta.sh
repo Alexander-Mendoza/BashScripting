@@ -30,8 +30,8 @@ function continuar(){
   money=$1
   play_counter=$2
   tput cnorm
-  echo -e "\n${yellowColour}[+]${endColour}${grayColour} ¿Desea continuar?(si/no) ->${endColour} " && read continue_option
-  if [ "$continue_option" == "no" ]; then
+  echo -ne "\n${yellowColour}[+]${endColour}${grayColour} ¿Desea continuar?(si/no) ->${endColour} " && read continue_option
+  if [ "${continue_option,,}" == "no" ]; then
      echo -e "\n${yellowColour}[+]${endColour}${grayColour} Dinero total: ${endColour}${yellowColour} $money€${endColour}"
      echo -e "${yellowColour}[+]${endColour}${grayColour} Jugadas Totales: ${endColour}${yellowColour} $play_counter${endColour}"
      echo -e "${redColour}[!] El Juego ha finalizado${redColour}\n"
@@ -300,18 +300,70 @@ function inverseLabrouchere(){
 
 function antiMartingala(){
   echo -e "${yellowColour}[+]${endColour}${grayColour} Dinero Total:${endColour}${greenColour} $money${endColour}"
-  echo -ne "${yellowColour}[+]${endColour}${grayColour} Ingrese la cantidad de dinero que desea apostar -> ${endColour}${purpleColour}" && read initial_bet
-  if [[ "$initial_bet" =~ ^[0-9]+$ ]]; then
-    echo -ne "${yellowColour}[+]${endColour}${grayColour} ¿Desea apostar a${endColour}${yellowColour} par${endColour}${grayColour} o${yellowColour} impar${endColour}${grayColour}?${endColour} ${endColour} ${purpleColour}" && read par_impar
-    if [ "${par_impar,,}" == "par" ]; then
-      echo -e "Par"
-    elif [ "${par_impar,,}" == "impar" ]; then
-      echo -e "impar"
+  echo -ne "${yellowColour}[+]${endColour}${grayColour} Ingrese la cantidad de dinero que desea apostar -> ${endColour}" && read initial_bet
+  if [[ "$initial_bet" =~ ^[0-9]+$ ]] && [ "$initial_bet" -gt "0" ]; then
+    echo -ne "${yellowColour}[+]${endColour}${grayColour} ¿Desea apostar a${endColour}${yellowColour} par${endColour}${grayColour} o${yellowColour} impar${endColour}${grayColour}?${endColour} ${endColour}" && read par_impar
+    if [ "${par_impar,,}" == "par" ] || [ "${par_impar,,}" == "impar" ]; then
+      backup_bet="$initial_bet"
+      play_counter=0
+      jugadas_malas="["
+      max_money=0
+      bet_to_renew="$(($money+50))"
+      while true; do
+        tput civis
+        if [ "$money" -gt "$bet_to_renew" ]; then
+          echo -e "${redColour}[!] Advertencia${redColour}"
+          let bet_to_renew+=50
+          echo -e "\n${yellowColour}[+]${endColour}${grayColour} Se ha superado el tope máximo a sido reajustado a: ${endColour}${greenColour} $bet_to_renew${endColour}"
+          initial_bet="$backup_bet"
+          echo -e "${yellowColour}[+]${endColour}${grayColour} La apuesta se reniciará a la inicial de${endColour}${greenColour} $initial_bet${endColour}"
+          continuar $money $play_counter
+        elif [ "$money" -lt "$(($bet_to_renew - 100))" ]; then
+          echo -e "${redColour}[!] Advertencia${redColour}"
+          let bet_to_renew-=50
+          echo -e "${yellowColour}[!]${endColour}${grayColour} Hemos llegado a un nivel crítico de pérdida, se procede a reajustar el tope máximo a:${endColour}${greenColour} $bet_to_renew${endColour}"
+          continuar $money $play_counter
+        fi
+        let play_counter+=1
+        let money-="$initial_bet"
+        random_number="$(($RANDOM % 37))"
+        echo -e "Ha salido el número $random_number"
+        if [ "$money" -gt 0 ]; then
+          if [ "${par_impar,,}" == "par" ]; then
+            if [ "$(($random_number % 2))" -eq "0" ] && [ "$random_number" -ne "0" ]; then
+              #Se gana
+              reward="$((initial_bet*2))"
+              let money+="$reward"
+              let initial_bet*=2
+              echo -e "\nGanas: Money= $money  initial_bet=$initial_bet"
+            else
+              initial_bet=$backup_bet
+              jugadas_malas+=" $random_number "
+              echo -e "\nPierdes: Money: $money  initial_bet: $initial_bet"
+            fi
+          else
+            if [ ! "$(($random_number % 2))" -eq "0" ]; then
+              #Se gana
+              reward="$((initial_bet*2))"
+              let money+="$reward"
+              let initial_bet*=2
+              echo -e "\nGanas: Money= $money  initial_bet=$initial_bet"
+            else
+              initial_bet=$backup_bet
+              jugadas_malas+=" $random_number "
+              echo -e "\nPierdes: Money: $money  initial_bet: $initial_bet"
+            fi
+          fi
+        else
+          echo -e "${yellowColour}[!]${endColour}${redColour} Te has quedado sin dinero el juego a finalizado${endColour}"
+          tput cnorm; exit 0
+        fi
+      done
     else
       echo -e "${redColour}[!] La opción ingresada es inválida${endColour}"
     fi
   else
-    echo -e "${redColour}[!] El valor ingresado en la apuesta tienen que ser un valor numérico${endColour}"
+    echo -e "${redColour}[!] El valor ingresado en la apuesta tienen que ser un valor numérico y mayor que 0${endColour}"
   fi
 }
 
