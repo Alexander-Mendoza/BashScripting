@@ -335,6 +335,10 @@ function antiMartingala(){
               reward="$((initial_bet*2))"
               let money+="$reward"
               let initial_bet*=2
+              jugadas_malas="[ "
+              if [ "$money" -gt "$max_money" ]; then 
+                max_money="$money"
+              fi
               echo -e "\nGanas: Money= $money  initial_bet=$initial_bet"
             else
               initial_bet=$backup_bet
@@ -347,7 +351,11 @@ function antiMartingala(){
               reward="$((initial_bet*2))"
               let money+="$reward"
               let initial_bet*=2
-              echo -e "\nGanas: Money= $money  initial_bet=$initial_bet"
+              jugadas_malas="[ "
+              if [ "$money" -gt "$max_money" ]; then 
+                max_money="$money"
+                echo -e "\nGanas: Money= $money  initial_bet=$initial_bet"
+              fi
             else
               initial_bet=$backup_bet
               jugadas_malas+=" $random_number "
@@ -356,6 +364,12 @@ function antiMartingala(){
           fi
         else
           echo -e "${yellowColour}[!]${endColour}${redColour} Te has quedado sin dinero el juego a finalizado${endColour}"
+			    echo -e "${yellowColour}[+]${endColour}${grayColour} Han habido un total de${endColour}${yellowColour} $(($play_counter))${endColour}${grayColour} jugadas${endColour}"
+			    echo -e "\n${yellowColour}[+]${endColour}${grayColour} A continuación se van a representar las malas jugas consecutivas que han salido${endColour}\n"
+			    echo -e "${blueColour}$jugadas_malas]${endColour}"
+
+			    echo -e "\n${yellowColour}[+]${endColour}${grayColour} Máximo de dinero alcanzado: ${endcolour}${yellowColour} $max_money${endColour} \n"
+
           tput cnorm; exit 0
         fi
       done
