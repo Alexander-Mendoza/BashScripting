@@ -28,6 +28,23 @@ function helpPanel(){
 
 function searchMovie(){
   movieName="$1"
+
+  movieName_checker="$(cat netflix_peliculas.js | grep -A 9 -i "\"titulo\": \"$movieName\"" | tr -d '"' | tr -d ',' | sed 's/ *//' | sed 's/--//')"
+
+  if [ "$movieName_checker" ]; then
+    echo -e "\n${yellowColour}[+]${endColour}${grayColour} Listando las características de la pelicúla${purpleColour} $movieName${endColour}${grayColour}:${endColour}\n"
+    IFS=$'\n'
+    for line in $movieName_checker; do
+      key_movie="$(echo $line | awk '{print $1}')"
+      information_movie="$(echo $line | cut -d ":" -f 2-)"
+      echo -e "${greenColour}$key_movie${endColour}${grayColour}$information_movie${endColour}"
+      if [ "$key_movie" == "link:" ]; then
+        echo -e "\n"
+      fi
+    done
+  else
+    echo -e "\n${redColour}[!] La película $movieName no existe${endColour}"
+  fi
 }
 
 # Indicadores
@@ -42,7 +59,7 @@ while getopts "m:h" arg; do
 done
 
 if [ "$parameter_counter" -eq 1 ]; then
-  searchMovie $movieName
+  searchMovie "$movieName"
 else
   helpPanel
 fi
