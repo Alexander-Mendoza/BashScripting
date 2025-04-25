@@ -23,6 +23,7 @@ trap ctrl_c INT
 function helpPanel(){
   echo -e "\n${yellowColour}[+]${endColour}${grayColour} Uso de: $0 ${endColour}"
   echo -e "\t${purpleColour}m)${endColour}${grayColour} Buscar por un nombre de película${endColour}"
+  echo -e "\t${purpleColour}y)${endColour}${grayColour} Buscar por película por su año${endColour}"
   echo -e "\t${purpleColour}h)${endColour}${grayColour} Mostrar este panel de ayuda${endColour}\n"
 }
 
@@ -32,7 +33,7 @@ function searchMovie(){
   movieName_checker="$(cat netflix_peliculas.js | grep -A 9 -i "\"titulo\": \"$movieName\"" | tr -d '"' | tr -d ',' | sed 's/ *//' | sed 's/--//')"
 
   if [ "$movieName_checker" ]; then
-    echo -e "\n${yellowColour}[+]${endColour}${grayColour} Listando las características de la pelicúla${purpleColour} $movieName${endColour}${grayColour}:${endColour}\n"
+    echo -e "\n${yellowColour}[+]${endColour}${grayColour} Listando las características de la película${purpleColour} $movieName${endColour}${grayColour}:${endColour}\n"
     IFS=$'\n'
     for line in $movieName_checker; do
       key_movie="$(echo $line | awk '{print $1}')"
@@ -47,19 +48,36 @@ function searchMovie(){
   fi
 }
 
+function searchYear(){
+  year="$1"
+  
+  movieName="$(cat netflix_peliculas.js | grep "\"año\": $year" -B 1 | grep "\"titulo\": " | tr -d '"' | tr -d ',' | awk '{print $2}' FS=":" | sed 's/ *//' | column)"
+
+  if [ "$movieName" ]; then
+    echo -e "\n${yellowColour}[+]${endColour}${grayColour} Representado las películas que salieron en el año${endColour}${blueColour} $year${endColour}${grayColour}:${endColour}"
+    echo -e "\n${greenColour}$movieName${endColour}"
+  else
+    echo -e "\n${redColour}[!] No se existe un película con el año indicado.${endColour}"
+  fi
+
+}
+
 # Indicadores
 declare -i parameter_counter=0
 
 # Parámetros
-while getopts "m:h" arg; do
+while getopts "m:y:h" arg; do
   case $arg in
     m) movieName="$OPTARG"; let parameter_counter+=1;;
+    y) year="$OPTARG"; let parameter_counter+=2;;
     h) ;;
   esac
 done
 
 if [ "$parameter_counter" -eq 1 ]; then
   searchMovie "$movieName"
+elif [ "$parameter_counter" -eq 2 ]; then
+  searchYear "$year"
 else
   helpPanel
 fi
