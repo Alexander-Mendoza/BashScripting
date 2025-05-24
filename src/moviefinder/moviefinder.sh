@@ -24,6 +24,7 @@ function helpPanel(){
   echo -e "\n${yellowColour}[+]${endColour}${grayColour} Uso de: $0 ${endColour}"
   echo -e "\t${purpleColour}m)${endColour}${grayColour} Buscar por un nombre de película${endColour}"
   echo -e "\t${purpleColour}y)${endColour}${grayColour} Buscar por película por su año${endColour}"
+  echo -e "\t${purpleColour}l)${endColour}${grayColour} Buscar el link de la película${endColour}"
   echo -e "\t${purpleColour}h)${endColour}${grayColour} Mostrar este panel de ayuda${endColour}\n"
 }
 
@@ -62,14 +63,28 @@ function searchYear(){
 
 }
 
+function getLink(){
+  movieName="$1"
+
+  link="$(cat netflix_peliculas.js | awk "/\"titulo\": \"$movieName\"/,/\"link\"/" | tr -d '"'| tr -d ',' | sed 's/^ *//' | grep "link" | awk 'NF{print $NF}')"
+
+  if [ "$link" ]; then
+    echo -e "\n${yellowColour}[+]${endColour}${grayColour} Los links para las peliculas con el nombre proporcionado son los siguientes:${endColour}\n${blueColour}$link${endColour} "
+  else
+    echo -e "\n${redColour}[!] El link para la película '$movieName' proporcionada no existe${endColour}"
+  fi
+
+}
+
 # Indicadores
 declare -i parameter_counter=0
 
 # Parámetros
-while getopts "m:y:h" arg; do
+while getopts "m:y:l:h" arg; do
   case $arg in
     m) movieName="$OPTARG"; let parameter_counter+=1;;
     y) year="$OPTARG"; let parameter_counter+=2;;
+    l) link="$OPTARG"; let parameter_counter+=3;;
     h) ;;
   esac
 done
@@ -78,6 +93,8 @@ if [ "$parameter_counter" -eq 1 ]; then
   searchMovie "$movieName"
 elif [ "$parameter_counter" -eq 2 ]; then
   searchYear "$year"
+elif [ "$parameter_counter" -eq 3 ]; then
+  getLink "$link"
 else
   helpPanel
 fi
