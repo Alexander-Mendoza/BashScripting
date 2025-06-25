@@ -24,6 +24,7 @@ function helpPanel(){
   echo -e "\n${yellowColour}[+]${endColour}${grayColour} Uso de: $0 ${endColour}"
   echo -e "\t${purpleColour}m)${endColour}${grayColour} Buscar por un nombre de película${endColour}"
   echo -e "\t${purpleColour}y)${endColour}${grayColour} Buscar por película por su año${endColour}"
+  echo -e "\t${purpleColour}i)${endColour}${grayColour} Buscar película por idioma${endColour}"
   echo -e "\t${purpleColour}l)${endColour}${grayColour} Buscar el link de la película${endColour}"
   echo -e "\t${purpleColour}h)${endColour}${grayColour} Mostrar este panel de ayuda${endColour}\n"
 }
@@ -58,9 +59,21 @@ function searchYear(){
     echo -e "\n${yellowColour}[+]${endColour}${grayColour} Representado las películas que salieron en el año${endColour}${blueColour} $year${endColour}${grayColour}:${endColour}"
     echo -e "\n${greenColour}$movieName${endColour}"
   else
-    echo -e "\n${redColour}[!] No se existe un película con el año indicado.${endColour}"
+    echo -e "\n${redColour}[!] No existe una película con el año indicado.${endColour}"
   fi
 
+}
+
+function searchLanguage(){
+  language="$1"
+
+  movieName="$(cat netflix_peliculas.js | grep "\"idioma\": \"$language\"" -i -B 7 | grep "\"titulo\"" | tr -d '"' | tr -d ',' | sed 's/^ *//' | awk '{print $2}' FS=':' | column)"
+
+  if [ "$movieName" ]; then
+    echo -e "\n${yellowColour}[+]${endColour}${grayColour} Respresentando las películas que están en:${endColour}${blueColour} $language${endColour}\n${purpleColour}$movieName${endColour}\n"
+  else
+    echo -e "\n${redColour}[!] No existe ninguna película en idioma: $language${endColour}"
+  fi
 }
 
 function getLink(){
@@ -73,18 +86,18 @@ function getLink(){
   else
     echo -e "\n${redColour}[!] El link para la película '$movieName' proporcionada no existe${endColour}"
   fi
-
 }
 
 # Indicadores
 declare -i parameter_counter=0
 
 # Parámetros
-while getopts "m:y:l:h" arg; do
+while getopts "m:y:l:i:h" arg; do
   case $arg in
     m) movieName="$OPTARG"; let parameter_counter+=1;;
     y) year="$OPTARG"; let parameter_counter+=2;;
     l) link="$OPTARG"; let parameter_counter+=3;;
+    i) language="$OPTARG"; let parameter_counter+=4;;
     h) ;;
   esac
 done
@@ -95,6 +108,8 @@ elif [ "$parameter_counter" -eq 2 ]; then
   searchYear "$year"
 elif [ "$parameter_counter" -eq 3 ]; then
   getLink "$link"
+elif [ "$parameter_counter" -eq 4 ]; then
+  searchLanguage "$language"
 else
   helpPanel
 fi
